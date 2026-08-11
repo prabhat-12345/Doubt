@@ -1,17 +1,18 @@
 import streamlit as st
 import google.generativeai as genai
+import os
 
-# Website ka layout aur naam set karna
+# 1. Website ka layout aur naam set karna
 st.set_page_config(page_title="MyAllie AI Doubt Solver", page_icon="🎓")
 st.title("🎓 MyAllie: AI Doubt Solver Bot")
 st.write("Apna Math ya Physics ka sawaal niche likhiye aur step-by-step solution paiye!")
 
 try:
-    # Streamlit Cloud ke advanced settings se secret key uthana
-    GOOGLE_API_KEY = st.secrets["GEMINI_API_KEY"] 
-    genai.configure(api_key=GOOGLE_API_KEY)
+    # 2. API Key ko sahi tarike se system me set karna (New Method)
+    os.environ["GEMINI_API_KEY"] = st.secrets["GEMINI_API_KEY"]
+    genai.configure()
 
-    # User ke liye question input box
+    # 3. User ke liye question input box
     user_question = st.text_area("Yahan apna sawaal type karein:", placeholder="Example: Solve x^2 - 5x + 6 = 0")
 
     if st.button("Solve My Doubt ✨"):
@@ -27,7 +28,7 @@ try:
                 Question: {user_question}
                 """
                 
-                # Gemini model se answer lena
+                # Latest and standard model name for 2026
                 model = genai.GenerativeModel('gemini-2.5-flash')
                 response = model.generate_content(prompt)
                 
@@ -37,5 +38,5 @@ try:
             st.warning("⚠️ Kripya pehle box me koi sawaal toh likhiye!")
 
 except Exception as e:
-    st.error("🔒 App Setup me koi dikkat hai! Kripya check karein ki aapne Streamlit Cloud me 'GEMINI_API_KEY' sahi se dali hai ya nahi.")
-  
+    st.error(f"🔒 App Setup me koi dikkat hai! Error details: {e}")
+    
