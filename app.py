@@ -1,56 +1,47 @@
-import streamlit as st
-import requests
+import streamlit as str
+import os
+from google import genai
+from google.genai.errors import APIError
 
-# 1. Page Configuration aur Title
-st.set_page_config(page_title="MyAllie AI Doubt Solver", page_icon="🎓")
+# पेज का टाइटल और सेटिंग सेट करें
+st.set_page_config(page_title="MyAllie: AI Doubt Solver Bot", page_icon="🎓")
+
 st.title("🎓 MyAllie: AI Doubt Solver Bot")
 st.write("Apna Math ya Physics ka sawaal niche likhiye aur step-by-step solution paiye!")
 
-try:
-    # Streamlit Secrets se aapki AQ. wali key uthana
-    api_key = st.secrets["GEMINI_API_KEY"]
+# Streamlit Secrets या Environment Variable से API Key उठाएं
+# नोट: स्थानीय परीक्षण के लिए आप सीधे स्ट्रिंग में अपनी Key भी डाल सकते हैं, जैसे: "AIzaSy..."
+api_key = st.secrets.get("GEMINI_API_KEY") or os.environ.get("GEMINI_API_KEY")
 
-    user_question = st.text_area("Yahan apna sawaal type karein:", placeholder="Example: 6+6")
+# यूजर इनपुट बॉक्स
+user_query = st.text_area("Yahan apna sawaal type karein:", value="7+7")
 
-    if st.button("Solve My Doubt ✨"):
-        if user_question:
-            with st.spinner("🔄 MyAllie Answer Generate Kar Raha Hai..."):
-                prompt_text = f"""
-                Aap ek India ke top coaching institute (jaise Allen/IIT-JEE) ke expert teacher hain.
-                Aapka naam 'MyAllie Bot' hai. User ke question ka answer in steps me dein:
-                1. 🧠 **Concept Used**: Pehle batayein kaun sa formula ya concept lega.
-                2. 📝 **Step-by-Step Solution**: Poori calculation aasan shabdo me Hinglish me samjhayein.
-                3. ✅ **Final Answer**: Last me answer ko ek box me ya bold karke dikhayein.
-
-                Question: {user_question}
-                """
+# बटन क्लिक होने पर एक्शन
+if st.button("Solve My Doubt ✨"):
+    if not api_key:
+        st.error("❌ API Key नहीं मिली! कृपया Streamlit Settings या Secrets में GEMINI_API_KEY सेट करें।")
+    elif not user_query.strip():
+        st.warning("⚠️ कृपया पहले कोई सवाल टाइप करें।")
+    else:
+        with st.spinner("Thinking..."):
+            try:
+                # नए SDK के अनुसार क्लाइंट इनिशियलाइज करें
+                client = genai.Client(api_key=api_key)
                 
-                # --- EK DUM SAHI V1 API PATH ---
-                url = "https://googleapis.com"
+                # सबसे तेज़ और सटीक मॉडल 'gemini-2.5-flash' का उपयोग करें
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=user_query
+                )
                 
-                query_params = {'key': api_key}
-                headers = {'Content-Type': 'application/json'}
+                # रिस्पॉन्स को सफलतापूर्वक प्रदर्शित करें
+                st.success("🤖 Solution:")
+                st.write(response.text)
                 
-                data = {
-                    "contents": [{
-                        "parts": [{"text": prompt_text}]
-                    }]
-                }
+            except APIError as e:
+                # Google API से आने वाले विशिष्ट एरर को हैंडल करें
+                st.error(f"❌ Google API Error: {e.message}")
+            except Exception as e:
+                # अन्य किसी भी अज्ञात एरर को रोकने के लिए
+                st.error(f"❌ एक अनपेक्षित एरer आया: {str(e)}")
                 
-                # Direct HTTP Post Request
-                response = requests.post(url, headers=headers, json=data, params=query_params)
-                
-                # Connection success check
-                if response.status_code == 200:
-                    result_json = response.json()
-                    answer = result_json['candidates'][0]['content']['parts'][0]['text']
-                    st.success("🎯 Solution Mil Gaya!")
-                    st.markdown(answer)
-                else:
-                    st.error(f"Google Server Error ({response.status_code}): {response.text}")
-        else:
-            st.warning("⚠️ Kripya pehle box me koi sawaal toh likhiye!")
-
-except Exception as e:
-    st.error(f"🔒 App Setup Error: {e}")
-    
