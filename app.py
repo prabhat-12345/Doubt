@@ -25,7 +25,7 @@ try:
                 Question: {user_question}
                 """
                 
-                # --- EK DUM SAHI AUR 100% WORKING GOOGLE URL FOR GEMINI 2.5 ---
+                # --- EK DUM SAHI V1 API PATH ---
                 url = "https://googleapis.com"
                 
                 query_params = {'key': api_key}
@@ -40,7 +40,7 @@ try:
                 # Direct HTTP Post Request
                 response = requests.post(url, headers=headers, json=data, params=query_params)
                 
-                # Agar connection sahi hai toh answer dikhao
+                # Connection success check
                 if response.status_code == 200:
                     result_json = response.json()
                     answer = result_json['candidates'][0]['content']['parts'][0]['text']
