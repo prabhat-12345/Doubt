@@ -1,16 +1,16 @@
 import streamlit as st
 import requests
 
-# 1. Page Config aur Title Set Karna
+# 1. Page Configuration
 st.set_page_config(page_title="MyAllie AI Doubt Solver", page_icon="🎓")
 st.title("🎓 MyAllie: AI Doubt Solver Bot")
 st.write("Apna Math ya Physics ka sawaal niche likhiye aur step-by-step solution paiye!")
 
 try:
-    # Secrets se key nikalna
+    # Secrets se key uthana
     api_key = st.secrets["GEMINI_API_KEY"]
 
-    user_question = st.text_area("Yahan apna sawaal type karein:", placeholder="Example: 4+5")
+    user_question = st.text_area("Yahan apna sawaal type karein:", placeholder="Example: 5+4")
 
     if st.button("Solve My Doubt ✨"):
         if user_question:
@@ -25,34 +25,32 @@ try:
                 Question: {user_question}
                 """
                 
-                # Direct Google API Endpoint for 2026 models
-                url = f"https://googleapis.com{api_key}"
+                # Sateek connection path standard API ke liye
+                url = "https://googleapis.com"
                 
-                # Sateek headers jo AQ. key format ko accept karwate hain
+                # Parameters ko alag rakhna taaki url mix na ho
+                query_params = {'key': api_key}
                 headers = {'Content-Type': 'application/json'}
                 
-                # Data payload structure
                 data = {
                     "contents": [{
                         "parts": [{"text": prompt_text}]
                     }]
                 }
                 
-                # Direct API Call
-                response = requests.post(url, headers=headers, json=data)
+                # Direct HTTP Request with distinct params
+                response = requests.post(url, headers=headers, json=data, params=query_params)
                 result_json = response.json()
                 
-                # Check performance and show output
                 if response.status_code == 200:
                     answer = result_json['candidates'][0]['content']['parts'][0]['text']
                     st.success("🎯 Solution Mil Gaya!")
                     st.markdown(answer)
                 else:
-                    # Agar abhi bhi koi error aaye toh detail me print karein
-                    st.error(f"Google Server Error ({response.status_code}): {result_json.get('error', {}).get('message', 'Unknown Error')}")
+                    st.error(f"Google Error ({response.status_code}): {result_json.get('error', {}).get('message', 'Unknown Error')}")
         else:
             st.warning("⚠️ Kripya pehle box me koi sawaal toh likhiye!")
 
 except Exception as e:
-    st.error(f"🔒 Setup Error: {e}")
+    st.error(f"🔒 App Setup Error: {e}")
     
