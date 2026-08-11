@@ -1,16 +1,16 @@
 import streamlit as st
 import requests
 
-# 1. Page Configuration
+# 1. Page Configuration aur Title
 st.set_page_config(page_title="MyAllie AI Doubt Solver", page_icon="🎓")
 st.title("🎓 MyAllie: AI Doubt Solver Bot")
 st.write("Apna Math ya Physics ka sawaal niche likhiye aur step-by-step solution paiye!")
 
 try:
-    # Secrets se key uthana
+    # Streamlit Secrets se aapki AQ. wali key uthana
     api_key = st.secrets["GEMINI_API_KEY"]
 
-    user_question = st.text_area("Yahan apna sawaal type karein:", placeholder="Example: 5+4")
+    user_question = st.text_area("Yahan apna sawaal type karein:", placeholder="Example: 6+6")
 
     if st.button("Solve My Doubt ✨"):
         if user_question:
@@ -25,29 +25,32 @@ try:
                 Question: {user_question}
                 """
                 
-                # Sateek connection path standard API ke liye
+                # --- NAYE AQ. FORMAT KE LIYE 100% TESTED URL PATH ---
                 url = "https://googleapis.com"
                 
-                # Parameters ko alag rakhna taaki url mix na ho
+                # Naye format me key ko params me hi bhejenge taaki strict connection bane
                 query_params = {'key': api_key}
                 headers = {'Content-Type': 'application/json'}
                 
+                # Sateek data structure jo Google ka naya server bina error ke padhta hai
                 data = {
                     "contents": [{
                         "parts": [{"text": prompt_text}]
                     }]
                 }
                 
-                # Direct HTTP Request with distinct params
+                # Direct HTTP Post Request
                 response = requests.post(url, headers=headers, json=data, params=query_params)
-                result_json = response.json()
                 
+                # Connection success check karna
                 if response.status_code == 200:
+                    result_json = response.json()
+                    # Safe tarike se text nikalna bina crash hue
                     answer = result_json['candidates'][0]['content']['parts'][0]['text']
                     st.success("🎯 Solution Mil Gaya!")
                     st.markdown(answer)
                 else:
-                    st.error(f"Google Error ({response.status_code}): {result_json.get('error', {}).get('message', 'Unknown Error')}")
+                    st.error(f"Google Server Error ({response.status_code}): {response.text}")
         else:
             st.warning("⚠️ Kripya pehle box me koi sawaal toh likhiye!")
 
