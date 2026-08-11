@@ -38,4 +38,4 @@ try:
 
 except Exception as e:
     st.error("🔒 App Setup me koi dikkat hai! Kripya check karein ki aapne Streamlit Cloud me 'GEMINI_API_KEY' sahi se dali hai ya nahi.")
-    
+
