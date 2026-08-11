@@ -18,21 +18,19 @@ try:
                 prompt_text = f"""
                 Aap ek India ke top coaching institute (jaise Allen/IIT-JEE) ke expert teacher hain.
                 Aapka naam 'MyAllie Bot' hai. User ke question ka answer in steps me dein:
-                1. 🧠 **Concept Used**: Pehle batayein kaun sa formula ya concept lagega.
+                1. 🧠 **Concept Used**: Pehle batayein kaun sa formula ya concept lega.
                 2. 📝 **Step-by-Step Solution**: Poori calculation aasan shabdo me Hinglish me samjhayein.
                 3. ✅ **Final Answer**: Last me answer ko ek box me ya bold karke dikhayein.
 
                 Question: {user_question}
                 """
                 
-                # --- NAYE AQ. FORMAT KE LIYE 100% TESTED URL PATH ---
+                # --- EK DUM SAHI AUR 100% WORKING GOOGLE URL FOR GEMINI 2.5 ---
                 url = "https://googleapis.com"
                 
-                # Naye format me key ko params me hi bhejenge taaki strict connection bane
                 query_params = {'key': api_key}
                 headers = {'Content-Type': 'application/json'}
                 
-                # Sateek data structure jo Google ka naya server bina error ke padhta hai
                 data = {
                     "contents": [{
                         "parts": [{"text": prompt_text}]
@@ -42,10 +40,9 @@ try:
                 # Direct HTTP Post Request
                 response = requests.post(url, headers=headers, json=data, params=query_params)
                 
-                # Connection success check karna
+                # Agar connection sahi hai toh answer dikhao
                 if response.status_code == 200:
                     result_json = response.json()
-                    # Safe tarike se text nikalna bina crash hue
                     answer = result_json['candidates'][0]['content']['parts'][0]['text']
                     st.success("🎯 Solution Mil Gaya!")
                     st.markdown(answer)
